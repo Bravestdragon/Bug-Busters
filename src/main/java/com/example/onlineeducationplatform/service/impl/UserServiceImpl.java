@@ -4,15 +4,21 @@ import com.example.onlineeducationplatform.mapper.UserMapper;
 import com.example.onlineeducationplatform.model.User;
 import com.example.onlineeducationplatform.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
 @Transactional
 public class UserServiceImpl implements UserService {
+
     @Autowired
     private UserMapper userMapper;
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public User getUserById(Integer id) {
@@ -26,11 +32,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public int addUser(User user) {
+        // Encode password before saving
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userMapper.insertUser(user);
     }
 
     @Override
     public int updateUser(User user) {
+        // If password is provided, encode it, otherwise keep the existing one
+        if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        } else {
+            // Get existing user to preserve current password
+            User existingUser = userMapper.selectUserById(user.getId());
+            if (existingUser != null) {
+                user.setPassword(existingUser.getPassword());
+            }
+        }
         return userMapper.updateUser(user);
     }
 
@@ -41,29 +59,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByUsername(String username) {
-        // Implement a method in UserMapper for this, or use selectAllUsers and filter
-        // (not efficient)
-        List<User> users = userMapper.selectAllUsers();
-        for (User user : users) {
-            if (user.getUsername().equals(username)) {
-                return user;
-            }
-        }
-        return null;
+        return userMapper.selectUserByUsername(username);
     }
 
     @Override
     public boolean checkPassword(String rawPassword, String encodedPassword) {
-        // Use BCryptPasswordEncoder for encoded passwords
-        org.springframework.security.crypto.password.PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-        return encoder.matches(rawPassword, encodedPassword);
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 
     @Override
     public void registerUser(User user) {
         // Encode password before saving
-        org.springframework.security.crypto.password.PasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
-        user.setPassword(encoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userMapper.insertUser(user);
     }
 }
