@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.EnrollmentMapper">
+
+    <resultMap id="enrollmentResultMap" type="Enrollment">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="course_name" property="courseName"/>
+        <result column="enrollment_status" property="enrollmentStatus"/>
+        <result column="enrolled_date" property="enrolledDate"/>
+        <result column="completed_date" property="completedDate"/>
+        <result column="progress_percentage" property="progressPercentage"/>
+    </resultMap>
+
+    <!-- Insert enrollment -->
+    <insert id="insertEnrollment" parameterType="Enrollment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO enrollments (course_id, student_id, student_name, course_name, enrollment_status, enrolled_date, progress_percentage)
+        VALUES (#{courseId}, #{studentId}, #{studentName}, #{courseName}, #{enrollmentStatus}, #{enrolledDate}, #{progressPercentage})
+    </insert>
+
+    <!-- Select enrollment by ID -->
+    <select id="selectEnrollmentById" parameterType="Integer" resultMap="enrollmentResultMap">
+        SELECT * FROM enrollments WHERE id = #{id}
+    </select>
+
+    <!-- Select enrollments by course -->
+    <select id="selectEnrollmentsByCourse" parameterType="Integer" resultMap="enrollmentResultMap">
+        SELECT * FROM enrollments WHERE course_id = #{courseId} ORDER BY enrolled_date DESC
+    </select>
+
+    <!-- Select enrollments by student -->
+    <select id="selectEnrollmentsByStudent" parameterType="Integer" resultMap="enrollmentResultMap">
+        SELECT * FROM enrollments WHERE student_id = #{studentId} ORDER BY enrolled_date DESC
+    </select>
+
+    <!-- Select enrollment by course and student -->
+    <select id="selectEnrollmentByCoursAndStudent" resultMap="enrollmentResultMap">
+        SELECT * FROM enrollments 
+        WHERE course_id = #{courseId} AND student_id = #{studentId}
+    </select>
+
+    <!-- Select all enrollments -->
+    <select id="selectAllEnrollments" resultMap="enrollmentResultMap">
+        SELECT * FROM enrollments ORDER BY enrolled_date DESC
+    </select>
+
+    <!-- Update enrollment -->
+    <update id="updateEnrollment" parameterType="Enrollment">
+        UPDATE enrollments
+        SET course_id = #{courseId},
+            student_id = #{studentId},
+            student_name = #{studentName},
+            course_name = #{courseName},
+            enrollment_status = #{enrollmentStatus},
+            enrolled_date = #{enrolledDate},
+            completed_date = #{completedDate},
+            progress_percentage = #{progressPercentage}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update enrollment status -->
+    <update id="updateEnrollmentStatus">
+        UPDATE enrollments
+        SET enrollment_status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update progress percentage -->
+    <update id="updateProgressPercentage">
+        UPDATE enrollments
+        SET progress_percentage = #{progress}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete enrollment -->
+    <delete id="deleteEnrollment" parameterType="Integer">
+        DELETE FROM enrollments WHERE id = #{id}
+    </delete>
+
+    <!-- Delete enrollment by course and student -->
+    <delete id="deleteEnrollmentByCoursAndStudent">
+        DELETE FROM enrollments 
+        WHERE course_id = #{courseId} AND student_id = #{studentId}
+    </delete>
+
+    <!-- Count enrollments for course -->
+    <select id="countEnrollmentsForCourse" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM enrollments WHERE course_id = #{courseId} AND enrollment_status = 'ACTIVE'
+    </select>
+
+</mapper>

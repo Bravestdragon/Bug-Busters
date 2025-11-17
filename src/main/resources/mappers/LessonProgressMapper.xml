@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.LessonProgressMapper">
+
+    <resultMap id="progressResultMap" type="LessonProgress">
+        <id column="id" property="id"/>
+        <result column="enrollment_id" property="enrollmentId"/>
+        <result column="lesson_id" property="lessonId"/>
+        <result column="course_id" property="courseId"/>
+        <result column="student_id" property="studentId"/>
+        <result column="is_completed" property="isCompleted"/>
+        <result column="completed_date" property="completedDate"/>
+        <result column="time_spent_minutes" property="timeSpentMinutes"/>
+        <result column="last_accessed_date" property="lastAccessedDate"/>
+    </resultMap>
+
+    <!-- Insert progress -->
+    <insert id="insertProgress" parameterType="LessonProgress" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO lesson_progress (enrollment_id, lesson_id, course_id, student_id, is_completed, time_spent_minutes)
+        VALUES (#{enrollmentId}, #{lessonId}, #{courseId}, #{studentId}, #{isCompleted}, #{timeSpentMinutes})
+    </insert>
+
+    <!-- Select progress by ID -->
+    <select id="selectProgressById" parameterType="Integer" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress WHERE id = #{id}
+    </select>
+
+    <!-- Select progress by enrollment and lesson -->
+    <select id="selectProgressByEnrollmentAndLesson" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress 
+        WHERE enrollment_id = #{enrollmentId} AND lesson_id = #{lessonId}
+    </select>
+
+    <!-- Select progress by enrollment -->
+    <select id="selectProgressByEnrollment" parameterType="Integer" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress 
+        WHERE enrollment_id = #{enrollmentId}
+        ORDER BY lesson_id ASC
+    </select>
+
+    <!-- Select progress by lesson -->
+    <select id="selectProgressByLesson" parameterType="Integer" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress 
+        WHERE lesson_id = #{lessonId}
+        ORDER BY student_id ASC
+    </select>
+
+    <!-- Select progress by student -->
+    <select id="selectProgressByStudent" parameterType="Integer" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress 
+        WHERE student_id = #{studentId}
+        ORDER BY lesson_id ASC
+    </select>
+
+    <!-- Select progress by course -->
+    <select id="selectProgressByCourse" parameterType="Integer" resultMap="progressResultMap">
+        SELECT * FROM lesson_progress 
+        WHERE course_id = #{courseId}
+        ORDER BY student_id, lesson_id ASC
+    </select>
+
+    <!-- Update progress -->
+    <update id="updateProgress" parameterType="LessonProgress">
+        UPDATE lesson_progress
+        SET is_completed = #{isCompleted},
+            completed_date = #{completedDate},
+            time_spent_minutes = #{timeSpentMinutes}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Mark lesson complete -->
+    <update id="markLessonComplete">
+        UPDATE lesson_progress
+        SET is_completed = TRUE,
+            completed_date = NOW()
+        WHERE enrollment_id = #{enrollmentId} AND lesson_id = #{lessonId}
+    </update>
+
+    <!-- Update time spent -->
+    <update id="updateTimeSpent">
+        UPDATE lesson_progress
+        SET time_spent_minutes = #{minutes}
+        WHERE enrollment_id = #{enrollmentId} AND lesson_id = #{lessonId}
+    </update>
+
+    <!-- Delete progress -->
+    <delete id="deleteProgress" parameterType="Integer">
+        DELETE FROM lesson_progress WHERE id = #{id}
+    </delete>
+
+    <!-- Count completed lessons by enrollment -->
+    <select id="countCompletedLessons" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM lesson_progress 
+        WHERE enrollment_id = #{enrollmentId} AND is_completed = TRUE
+    </select>
+
+    <!-- Count completed lessons by enrollment and course -->
+    <select id="countCompletedLessonsByCourse" resultType="Integer">
+        SELECT COUNT(*) FROM lesson_progress 
+        WHERE enrollment_id = #{enrollmentId} AND course_id = #{courseId} AND is_completed = TRUE
+    </select>
+
+</mapper>

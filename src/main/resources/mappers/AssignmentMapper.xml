@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.AssignmentMapper">
+    <resultMap id="AssignmentResultMap" type="com.example.onlineeducationplatform.model.Assignment">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="lesson_id" property="lessonId"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="due_date" property="dueDate"/>
+        <result column="max_score" property="maxScore"/>
+        <result column="requirements" property="requirements"/>
+        <result column="status" property="status"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.onlineeducationplatform.model.Assignment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO assignments (course_id, lesson_id, title, description, due_date, max_score, requirements, status, created_at, updated_at)
+        VALUES (#{courseId}, #{lessonId}, #{title}, #{description}, #{dueDate}, #{maxScore}, #{requirements}, #{status}, NOW(), NOW())
+    </insert>
+
+    <select id="selectById" parameterType="Long" resultMap="AssignmentResultMap">
+        SELECT * FROM assignments WHERE id = #{id}
+    </select>
+
+    <select id="selectByCourseId" parameterType="Long" resultMap="AssignmentResultMap">
+        SELECT * FROM assignments WHERE course_id = #{courseId} ORDER BY due_date DESC
+    </select>
+
+    <select id="selectByLessonId" parameterType="Long" resultMap="AssignmentResultMap">
+        SELECT * FROM assignments WHERE lesson_id = #{lessonId} ORDER BY due_date DESC
+    </select>
+
+    <select id="selectByStatus" parameterType="String" resultMap="AssignmentResultMap">
+        SELECT * FROM assignments WHERE status = #{status} ORDER BY due_date DESC
+    </select>
+
+    <select id="selectAll" resultMap="AssignmentResultMap">
+        SELECT * FROM assignments ORDER BY due_date DESC
+    </select>
+
+    <update id="update" parameterType="com.example.onlineeducationplatform.model.Assignment">
+        UPDATE assignments 
+        SET title = #{title}, description = #{description}, due_date = #{dueDate}, 
+            max_score = #{maxScore}, requirements = #{requirements}, status = #{status}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE assignments SET status = #{status}, updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        DELETE FROM assignments WHERE id = #{id}
+    </delete>
+
+    <select id="countByCourseId" parameterType="Long" resultType="int">
+        SELECT COUNT(*) FROM assignments WHERE course_id = #{courseId}
+    </select>
+
+    <select id="countByLessonId" parameterType="Long" resultType="int">
+        SELECT COUNT(*) FROM assignments WHERE lesson_id = #{lessonId}
+    </select>
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.CourseMapper">
+
+    <insert id="insertCourse" parameterType="com.example.onlineeducationplatform.model.Course" 
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO courses (title, description, category, instructor_id, instructor_name, created_date, updated_date, status, enrollment_count)
+        VALUES (#{title}, #{description}, #{category}, #{instructorId}, #{instructorName}, NOW(), NOW(), #{status}, 0)
+    </insert>
+
+    <select id="selectCourseById" parameterType="int" 
+            resultType="com.example.onlineeducationplatform.model.Course">
+        SELECT id, title, description, category, instructor_id as instructorId, 
+               instructor_name as instructorName, created_date as createdDate, 
+               updated_date as updatedDate, status, enrollment_count as enrollmentCount
+        FROM courses WHERE id = #{id}
+    </select>
+
+    <select id="selectAllCourses" resultType="com.example.onlineeducationplatform.model.Course">
+        SELECT id, title, description, category, instructor_id as instructorId, 
+               instructor_name as instructorName, created_date as createdDate, 
+               updated_date as updatedDate, status, enrollment_count as enrollmentCount
+        FROM courses ORDER BY created_date DESC
+    </select>
+
+    <select id="selectCoursesByCategory" parameterType="string" 
+            resultType="com.example.onlineeducationplatform.model.Course">
+        SELECT id, title, description, category, instructor_id as instructorId, 
+               instructor_name as instructorName, created_date as createdDate, 
+               updated_date as updatedDate, status, enrollment_count as enrollmentCount
+        FROM courses WHERE category = #{category} AND status = 'PUBLISHED' 
+        ORDER BY created_date DESC
+    </select>
+
+    <select id="selectCoursesByInstructor" parameterType="int" 
+            resultType="com.example.onlineeducationplatform.model.Course">
+        SELECT id, title, description, category, instructor_id as instructorId, 
+               instructor_name as instructorName, created_date as createdDate, 
+               updated_date as updatedDate, status, enrollment_count as enrollmentCount
+        FROM courses WHERE instructor_id = #{instructorId} 
+        ORDER BY created_date DESC
+    </select>
+
+    <select id="searchCourses" parameterType="string" 
+            resultType="com.example.onlineeducationplatform.model.Course">
+        SELECT id, title, description, category, instructor_id as instructorId, 
+               instructor_name as instructorName, created_date as createdDate, 
+               updated_date as updatedDate, status, enrollment_count as enrollmentCount
+        FROM courses 
+        WHERE (title LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+        AND status = 'PUBLISHED'
+        ORDER BY created_date DESC
+    </select>
+
+    <select id="selectAllCategories" resultType="string">
+        SELECT DISTINCT category FROM courses WHERE status = 'PUBLISHED' ORDER BY category
+    </select>
+
+    <update id="updateCourse" parameterType="com.example.onlineeducationplatform.model.Course">
+        UPDATE courses 
+        SET title = #{title}, description = #{description}, category = #{category}, 
+            status = #{status}, updated_date = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteCourse" parameterType="int">
+        DELETE FROM courses WHERE id = #{id}
+    </delete>
+
+</mapper>

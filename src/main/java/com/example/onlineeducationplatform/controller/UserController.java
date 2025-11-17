@@ -39,7 +39,9 @@ public class UserController {
             if (user != null && userService.checkPassword(loginUser.getPassword(), user.getPassword())) {
                 // Generate JWT token
                 String token = jwtUtil.generateToken(user.getUsername());
+                // Return user info including role
                 AuthResponse response = new AuthResponse(token, "Login successful", user.getUsername());
+                response.setRole(user.getRole());
                 return ResponseEntity.ok().body(response);
             } else {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
@@ -88,8 +90,22 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<?> addUser(@RequestBody User user) {
+    public ResponseEntity<?> addUser(@RequestBody User user,
+                                     @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Only the admin "axzil" may set role on creation. Otherwise default to USER.
+            String creator = null;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (jwtUtil.validateToken(token)) {
+                    creator = jwtUtil.extractUsername(token);
+                }
+            }
+
+            if (user.getRole() != null && !"axzil".equalsIgnoreCase(creator)) {
+                user.setRole("USER");
+            }
+
             int result = userService.addUser(user);
             if (result > 0) {
                 return new ResponseEntity<>(user, HttpStatus.CREATED);
@@ -102,14 +118,43 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable Integer id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable Integer id,
+                                        @RequestBody User user,
+                                        @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            // Check if user being updated exists
+            User existingUser = userService.getUserById(id);
+            if (existingUser == null) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            // Determine requester username from JWT (if present)
+            String requester = null;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (jwtUtil.validateToken(token)) {
+                    requester = jwtUtil.extractUsername(token);
+                }
+            }
+
+            // If role is being changed, only allow if requester is admin "axzil"
+            if (user.getRole() != null && !user.getRole().equalsIgnoreCase(existingUser.getRole())) {
+                if (!"axzil".equalsIgnoreCase(requester)) {
+                    return new ResponseEntity<>("Forbidden: only admin can change roles", HttpStatus.FORBIDDEN);
+                }
+            }
+
+            // Only allow edits if requester is the account owner or the admin 'axzil'
+            if (requester == null || (!requester.equalsIgnoreCase(existingUser.getUsername()) && !"axzil".equalsIgnoreCase(requester))) {
+                return new ResponseEntity<>("Forbidden: you may only edit your own profile", HttpStatus.FORBIDDEN);
+            }
+
             user.setId(id);
             int result = userService.updateUser(user);
             if (result > 0) {
                 return ResponseEntity.ok(user);
             } else {
-                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Failed to update user", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update user: " + e.getMessage());
@@ -117,13 +162,33 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable Integer id) {
+    public ResponseEntity<?> deleteUser(@PathVariable Integer id,
+                                        @org.springframework.web.bind.annotation.RequestHeader(value = "Authorization", required = false) String authHeader) {
         try {
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+            }
+
+            // Determine requester username from JWT (if present)
+            String requester = null;
+            if (authHeader != null && authHeader.startsWith("Bearer ")) {
+                String token = authHeader.substring(7);
+                if (jwtUtil.validateToken(token)) {
+                    requester = jwtUtil.extractUsername(token);
+                }
+            }
+
+            // Only admin "axzil" can delete users
+            if (!"axzil".equalsIgnoreCase(requester)) {
+                return new ResponseEntity<>("Forbidden: only admin can delete users", HttpStatus.FORBIDDEN);
+            }
+
             int result = userService.deleteUser(id);
             if (result > 0) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             } else {
-                return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>("Failed to delete user", HttpStatus.INTERNAL_SERVER_ERROR);
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete user: " + e.getMessage());

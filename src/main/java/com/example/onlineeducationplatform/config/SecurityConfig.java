@@ -26,6 +26,10 @@ public class SecurityConfig {
                 .requestMatchers("/", "/index.html", "/favicon.ico",
                                "/api/users/login", "/api/users/register").permitAll()
                 .requestMatchers("/api/users/**").permitAll() // Allow all user endpoints for now
+                .requestMatchers("/api/courses/**").permitAll() // Allow all course endpoints for now
+                .requestMatchers("/api/enrollments/**").permitAll() // Allow all enrollment endpoints for now
+                .requestMatchers("/api/lessons/**").permitAll() // Allow all lesson endpoints for now
+                .requestMatchers("/api/lesson-progress/**").permitAll() // Allow all progress endpoints for now
                 .anyRequest().authenticated()
             );
 

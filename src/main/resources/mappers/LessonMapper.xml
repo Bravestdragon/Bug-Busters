@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.LessonMapper">
+
+    <resultMap id="lessonResultMap" type="Lesson">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="content" property="content"/>
+        <result column="video_url" property="videoUrl"/>
+        <result column="sequence_number" property="sequenceNumber"/>
+        <result column="duration_minutes" property="durationMinutes"/>
+        <result column="status" property="status"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="updated_date" property="updatedDate"/>
+    </resultMap>
+
+    <!-- Insert lesson -->
+    <insert id="insertLesson" parameterType="Lesson" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO lessons (course_id, title, description, content, video_url, sequence_number, duration_minutes, status)
+        VALUES (#{courseId}, #{title}, #{description}, #{content}, #{videoUrl}, #{sequenceNumber}, #{durationMinutes}, #{status})
+    </insert>
+
+    <!-- Select lesson by ID -->
+    <select id="selectLessonById" parameterType="Integer" resultMap="lessonResultMap">
+        SELECT * FROM lessons WHERE id = #{id}
+    </select>
+
+    <!-- Select lessons by course -->
+    <select id="selectLessonsByCourse" parameterType="Integer" resultMap="lessonResultMap">
+        SELECT * FROM lessons WHERE course_id = #{courseId}
+    </select>
+
+    <!-- Select lessons by course ordered by sequence -->
+    <select id="selectLessonsByCourseOrdered" parameterType="Integer" resultMap="lessonResultMap">
+        SELECT * FROM lessons WHERE course_id = #{courseId} ORDER BY sequence_number ASC
+    </select>
+
+    <!-- Select published lessons by course -->
+    <select id="selectPublishedLessonsByCourse" parameterType="Integer" resultMap="lessonResultMap">
+        SELECT * FROM lessons 
+        WHERE course_id = #{courseId} AND status = 'PUBLISHED'
+        ORDER BY sequence_number ASC
+    </select>
+
+    <!-- Select lesson by ID and course -->
+    <select id="selectLessonByIdAndCourse" resultMap="lessonResultMap">
+        SELECT * FROM lessons WHERE id = #{id} AND course_id = #{courseId}
+    </select>
+
+    <!-- Select all lessons -->
+    <select id="selectAllLessons" resultMap="lessonResultMap">
+        SELECT * FROM lessons ORDER BY course_id, sequence_number
+    </select>
+
+    <!-- Update lesson -->
+    <update id="updateLesson" parameterType="Lesson">
+        UPDATE lessons
+        SET course_id = #{courseId},
+            title = #{title},
+            description = #{description},
+            content = #{content},
+            video_url = #{videoUrl},
+            sequence_number = #{sequenceNumber},
+            duration_minutes = #{durationMinutes},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update lesson status -->
+    <update id="updateLessonStatus">
+        UPDATE lessons
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete lesson -->
+    <delete id="deleteLesson" parameterType="Integer">
+        DELETE FROM lessons WHERE id = #{id}
+    </delete>
+
+    <!-- Delete lessons by course -->
+    <delete id="deleteLessonsByCourse" parameterType="Integer">
+        DELETE FROM lessons WHERE course_id = #{courseId}
+    </delete>
+
+    <!-- Count lessons by course -->
+    <select id="countLessonsByCourse" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM lessons WHERE course_id = #{courseId}
+    </select>
+
+</mapper>

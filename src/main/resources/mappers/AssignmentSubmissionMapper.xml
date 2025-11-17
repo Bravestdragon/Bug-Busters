@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.AssignmentSubmissionMapper">
+    <resultMap id="SubmissionResultMap" type="com.example.onlineeducationplatform.model.AssignmentSubmission">
+        <id column="id" property="id"/>
+        <result column="assignment_id" property="assignmentId"/>
+        <result column="enrollment_id" property="enrollmentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="submission_file" property="submissionFile"/>
+        <result column="submission_text" property="submissionText"/>
+        <result column="submitted_at" property="submittedAt"/>
+        <result column="status" property="status"/>
+        <result column="score" property="score"/>
+        <result column="feedback" property="feedback"/>
+        <result column="graded_at" property="gradedAt"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.onlineeducationplatform.model.AssignmentSubmission" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO assignment_submissions (assignment_id, enrollment_id, user_id, submission_file, submission_text, status, created_at, updated_at)
+        VALUES (#{assignmentId}, #{enrollmentId}, #{userId}, #{submissionFile}, #{submissionText}, #{status}, NOW(), NOW())
+    </insert>
+
+    <select id="selectById" parameterType="Long" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE id = #{id}
+    </select>
+
+    <select id="selectByAssignmentId" parameterType="Long" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE assignment_id = #{assignmentId} ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByEnrollmentId" parameterType="Long" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE enrollment_id = #{enrollmentId} ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE user_id = #{userId} ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByStatus" parameterType="String" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE status = #{status} ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByAssignmentAndUser" parameterType="map" resultMap="SubmissionResultMap">
+        SELECT * FROM assignment_submissions WHERE assignment_id = #{assignmentId} AND user_id = #{userId}
+    </select>
+
+    <update id="update" parameterType="com.example.onlineeducationplatform.model.AssignmentSubmission">
+        UPDATE assignment_submissions 
+        SET submission_file = #{submissionFile}, submission_text = #{submissionText}, 
+            submitted_at = #{submittedAt}, status = #{status}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        UPDATE assignment_submissions SET status = #{status}, submitted_at = NOW(), updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <update id="gradeSubmission" parameterType="map">
+        UPDATE assignment_submissions SET score = #{score}, feedback = #{feedback}, status = 'GRADED', graded_at = NOW(), updated_at = NOW() WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        DELETE FROM assignment_submissions WHERE id = #{id}
+    </delete>
+
+    <select id="countByAssignmentId" parameterType="Long" resultType="int">
+        SELECT COUNT(*) FROM assignment_submissions WHERE assignment_id = #{assignmentId}
+    </select>
+
+    <select id="countByEnrollmentId" parameterType="Long" resultType="int">
+        SELECT COUNT(*) FROM assignment_submissions WHERE enrollment_id = #{enrollmentId}
+    </select>
+</mapper>

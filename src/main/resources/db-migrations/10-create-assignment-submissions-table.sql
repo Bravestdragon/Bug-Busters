@@ -1,0 +1,23 @@
+CREATE TABLE IF NOT EXISTS assignment_submissions (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    assignment_id BIGINT NOT NULL,
+    enrollment_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    submission_file VARCHAR(500),
+    submission_text LONGTEXT,
+    submitted_at DATETIME,
+    status VARCHAR(50) DEFAULT 'PENDING',
+    score INT,
+    feedback LONGTEXT,
+    graded_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (assignment_id) REFERENCES assignments(id) ON DELETE CASCADE,
+    FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY unique_assignment_user (assignment_id, user_id),
+    INDEX idx_assignment_id (assignment_id),
+    INDEX idx_enrollment_id (enrollment_id),
+    INDEX idx_user_id (user_id),
+    INDEX idx_status (status)
+);

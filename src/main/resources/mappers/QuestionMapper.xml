@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.QuestionMapper">
+
+    <resultMap id="questionResultMap" type="Question">
+        <id column="id" property="id"/>
+        <result column="quiz_id" property="quizId"/>
+        <result column="question_text" property="questionText"/>
+        <result column="question_type" property="questionType"/>
+        <result column="points" property="points"/>
+        <result column="sequence_number" property="sequenceNumber"/>
+        <result column="correct_answer" property="correctAnswer"/>
+        <result column="explanation" property="explanation"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="updated_date" property="updatedDate"/>
+    </resultMap>
+
+    <!-- Insert question -->
+    <insert id="insertQuestion" parameterType="Question" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO questions (quiz_id, question_text, question_type, points, sequence_number, correct_answer, explanation)
+        VALUES (#{quizId}, #{questionText}, #{questionType}, #{points}, #{sequenceNumber}, #{correctAnswer}, #{explanation})
+    </insert>
+
+    <!-- Select question by ID -->
+    <select id="selectQuestionById" parameterType="Integer" resultMap="questionResultMap">
+        SELECT * FROM questions WHERE id = #{id}
+    </select>
+
+    <!-- Select questions by quiz -->
+    <select id="selectQuestionsByQuiz" parameterType="Integer" resultMap="questionResultMap">
+        SELECT * FROM questions WHERE quiz_id = #{quizId}
+    </select>
+
+    <!-- Select questions by quiz ordered -->
+    <select id="selectQuestionsByQuizOrdered" parameterType="Integer" resultMap="questionResultMap">
+        SELECT * FROM questions WHERE quiz_id = #{quizId} ORDER BY sequence_number ASC
+    </select>
+
+    <!-- Select all questions -->
+    <select id="selectAllQuestions" resultMap="questionResultMap">
+        SELECT * FROM questions ORDER BY quiz_id, sequence_number
+    </select>
+
+    <!-- Update question -->
+    <update id="updateQuestion" parameterType="Question">
+        UPDATE questions
+        SET quiz_id = #{quizId},
+            question_text = #{questionText},
+            question_type = #{questionType},
+            points = #{points},
+            sequence_number = #{sequenceNumber},
+            correct_answer = #{correctAnswer},
+            explanation = #{explanation}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update question sequence -->
+    <update id="updateQuestionSequence">
+        UPDATE questions
+        SET sequence_number = #{sequenceNumber}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete question -->
+    <delete id="deleteQuestion" parameterType="Integer">
+        DELETE FROM questions WHERE id = #{id}
+    </delete>
+
+    <!-- Delete questions by quiz -->
+    <delete id="deleteQuestionsByQuiz" parameterType="Integer">
+        DELETE FROM questions WHERE quiz_id = #{quizId}
+    </delete>
+
+    <!-- Count questions by quiz -->
+    <select id="countQuestionsByQuiz" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM questions WHERE quiz_id = #{quizId}
+    </select>
+
+</mapper>

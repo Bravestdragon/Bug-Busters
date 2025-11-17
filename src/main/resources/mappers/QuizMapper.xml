@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.QuizMapper">
+
+    <resultMap id="quizResultMap" type="Quiz">
+        <id column="id" property="id"/>
+        <result column="course_id" property="courseId"/>
+        <result column="lesson_id" property="lessonId"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="passing_score" property="passingScore"/>
+        <result column="time_limit" property="timeLimit"/>
+        <result column="total_questions" property="totalQuestions"/>
+        <result column="status" property="status"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="created_date" property="createdDate"/>
+        <result column="updated_date" property="updatedDate"/>
+    </resultMap>
+
+    <!-- Insert quiz -->
+    <insert id="insertQuiz" parameterType="Quiz" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quizzes (course_id, lesson_id, title, description, passing_score, time_limit, total_questions, status, created_by)
+        VALUES (#{courseId}, #{lessonId}, #{title}, #{description}, #{passingScore}, #{timeLimit}, #{totalQuestions}, #{status}, #{createdBy})
+    </insert>
+
+    <!-- Select quiz by ID -->
+    <select id="selectQuizById" parameterType="Integer" resultMap="quizResultMap">
+        SELECT * FROM quizzes WHERE id = #{id}
+    </select>
+
+    <!-- Select quizzes by course -->
+    <select id="selectQuizzesByCourse" parameterType="Integer" resultMap="quizResultMap">
+        SELECT * FROM quizzes WHERE course_id = #{courseId} ORDER BY created_date DESC
+    </select>
+
+    <!-- Select quizzes by lesson -->
+    <select id="selectQuizzesByLesson" parameterType="Integer" resultMap="quizResultMap">
+        SELECT * FROM quizzes WHERE lesson_id = #{lessonId} ORDER BY created_date DESC
+    </select>
+
+    <!-- Select published quizzes by course -->
+    <select id="selectPublishedQuizzesByCourse" parameterType="Integer" resultMap="quizResultMap">
+        SELECT * FROM quizzes 
+        WHERE course_id = #{courseId} AND status = 'PUBLISHED'
+        ORDER BY created_date DESC
+    </select>
+
+    <!-- Select published quizzes by lesson -->
+    <select id="selectPublishedQuizzesByLesson" parameterType="Integer" resultMap="quizResultMap">
+        SELECT * FROM quizzes 
+        WHERE lesson_id = #{lessonId} AND status = 'PUBLISHED'
+        ORDER BY created_date DESC
+    </select>
+
+    <!-- Select all quizzes -->
+    <select id="selectAllQuizzes" resultMap="quizResultMap">
+        SELECT * FROM quizzes ORDER BY created_date DESC
+    </select>
+
+    <!-- Update quiz -->
+    <update id="updateQuiz" parameterType="Quiz">
+        UPDATE quizzes
+        SET course_id = #{courseId},
+            lesson_id = #{lessonId},
+            title = #{title},
+            description = #{description},
+            passing_score = #{passingScore},
+            time_limit = #{timeLimit},
+            total_questions = #{totalQuestions},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update quiz status -->
+    <update id="updateQuizStatus">
+        UPDATE quizzes
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update total questions -->
+    <update id="updateQuizTotalQuestions">
+        UPDATE quizzes
+        SET total_questions = #{totalQuestions}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete quiz -->
+    <delete id="deleteQuiz" parameterType="Integer">
+        DELETE FROM quizzes WHERE id = #{id}
+    </delete>
+
+    <!-- Delete quizzes by course -->
+    <delete id="deleteQuizzesByCourse" parameterType="Integer">
+        DELETE FROM quizzes WHERE course_id = #{courseId}
+    </delete>
+
+    <!-- Delete quizzes by lesson -->
+    <delete id="deleteQuizzesByLesson" parameterType="Integer">
+        DELETE FROM quizzes WHERE lesson_id = #{lessonId}
+    </delete>
+
+    <!-- Count quizzes by course -->
+    <select id="countQuizzesByCourse" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM quizzes WHERE course_id = #{courseId}
+    </select>
+
+    <!-- Count quizzes by lesson -->
+    <select id="countQuizzesByLesson" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM quizzes WHERE lesson_id = #{lessonId}
+    </select>
+
+</mapper>

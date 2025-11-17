@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.QuizAttemptMapper">
+
+    <resultMap id="quizAttemptResultMap" type="QuizAttempt">
+        <id column="id" property="id"/>
+        <result column="quiz_id" property="quizId"/>
+        <result column="enrollment_id" property="enrollmentId"/>
+        <result column="user_id" property="userId"/>
+        <result column="score" property="score"/>
+        <result column="total_points" property="totalPoints"/>
+        <result column="percentage" property="percentage"/>
+        <result column="status" property="status"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="time_spent_seconds" property="timeSpentSeconds"/>
+    </resultMap>
+
+    <!-- Insert quiz attempt -->
+    <insert id="insertQuizAttempt" parameterType="QuizAttempt" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO quiz_attempts (quiz_id, enrollment_id, user_id, score, total_points, percentage, status, start_time, end_time, time_spent_seconds)
+        VALUES (#{quizId}, #{enrollmentId}, #{userId}, #{score}, #{totalPoints}, #{percentage}, #{status}, #{startTime}, #{endTime}, #{timeSpentSeconds})
+    </insert>
+
+    <!-- Select quiz attempt by ID -->
+    <select id="selectQuizAttemptById" parameterType="Integer" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts WHERE id = #{id}
+    </select>
+
+    <!-- Select attempts by quiz -->
+    <select id="selectAttemptsByQuiz" parameterType="Integer" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts WHERE quiz_id = #{quizId} ORDER BY start_time DESC
+    </select>
+
+    <!-- Select attempts by student -->
+    <select id="selectAttemptsByStudent" parameterType="Integer" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts WHERE user_id = #{userId} ORDER BY start_time DESC
+    </select>
+
+    <!-- Select attempts by enrollment -->
+    <select id="selectAttemptsByEnrollment" parameterType="Integer" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts WHERE enrollment_id = #{enrollmentId} ORDER BY start_time DESC
+    </select>
+
+    <!-- Select attempts by quiz and student -->
+    <select id="selectAttemptsByQuizAndStudent" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts WHERE quiz_id = #{quizId} AND user_id = #{userId} ORDER BY start_time DESC
+    </select>
+
+    <!-- Select all attempts -->
+    <select id="selectAllAttempts" resultMap="quizAttemptResultMap">
+        SELECT * FROM quiz_attempts ORDER BY start_time DESC
+    </select>
+
+    <!-- Update quiz attempt -->
+    <update id="updateQuizAttempt" parameterType="QuizAttempt">
+        UPDATE quiz_attempts
+        SET quiz_id = #{quizId},
+            enrollment_id = #{enrollmentId},
+            user_id = #{userId},
+            score = #{score},
+            total_points = #{totalPoints},
+            percentage = #{percentage},
+            status = #{status},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            time_spent_seconds = #{timeSpentSeconds}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update attempt status -->
+    <update id="updateAttemptStatus">
+        UPDATE quiz_attempts
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Update attempt score -->
+    <update id="updateAttemptScore">
+        UPDATE quiz_attempts
+        SET score = #{score}, percentage = #{percentage}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete quiz attempt -->
+    <delete id="deleteQuizAttempt" parameterType="Integer">
+        DELETE FROM quiz_attempts WHERE id = #{id}
+    </delete>
+
+    <!-- Delete attempts by quiz -->
+    <delete id="deleteAttemptsByQuiz" parameterType="Integer">
+        DELETE FROM quiz_attempts WHERE quiz_id = #{quizId}
+    </delete>
+
+    <!-- Delete attempts by student -->
+    <delete id="deleteAttemptsByStudent" parameterType="Integer">
+        DELETE FROM quiz_attempts WHERE user_id = #{userId}
+    </delete>
+
+    <!-- Count attempts by quiz -->
+    <select id="countAttemptsByQuiz" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM quiz_attempts WHERE quiz_id = #{quizId}
+    </select>
+
+    <!-- Count attempts by student -->
+    <select id="countAttemptsByStudent" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM quiz_attempts WHERE user_id = #{userId}
+    </select>
+
+    <!-- Count passed attempts -->
+    <select id="countPassedAttempts" resultType="Integer">
+        SELECT COUNT(*) FROM quiz_attempts 
+        WHERE quiz_id = #{quizId} AND user_id = #{userId} AND percentage >= #{passingScore}
+    </select>
+
+</mapper>

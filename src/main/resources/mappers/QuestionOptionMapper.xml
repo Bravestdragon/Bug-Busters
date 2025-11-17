@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.onlineeducationplatform.mapper.QuestionOptionMapper">
+
+    <resultMap id="questionOptionResultMap" type="QuestionOption">
+        <id column="id" property="id"/>
+        <result column="question_id" property="questionId"/>
+        <result column="option_text" property="optionText"/>
+        <result column="option_label" property="optionLabel"/>
+        <result column="sequence_number" property="sequenceNumber"/>
+        <result column="is_correct" property="isCorrect"/>
+    </resultMap>
+
+    <!-- Insert question option -->
+    <insert id="insertQuestionOption" parameterType="QuestionOption" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO question_options (question_id, option_text, option_label, sequence_number, is_correct)
+        VALUES (#{questionId}, #{optionText}, #{optionLabel}, #{sequenceNumber}, #{isCorrect})
+    </insert>
+
+    <!-- Select option by ID -->
+    <select id="selectOptionById" parameterType="Integer" resultMap="questionOptionResultMap">
+        SELECT * FROM question_options WHERE id = #{id}
+    </select>
+
+    <!-- Select options by question -->
+    <select id="selectOptionsByQuestion" parameterType="Integer" resultMap="questionOptionResultMap">
+        SELECT * FROM question_options WHERE question_id = #{questionId}
+    </select>
+
+    <!-- Select options by question ordered -->
+    <select id="selectOptionsByQuestionOrdered" parameterType="Integer" resultMap="questionOptionResultMap">
+        SELECT * FROM question_options WHERE question_id = #{questionId} ORDER BY sequence_number ASC
+    </select>
+
+    <!-- Select all options -->
+    <select id="selectAllOptions" resultMap="questionOptionResultMap">
+        SELECT * FROM question_options ORDER BY question_id, sequence_number
+    </select>
+
+    <!-- Update question option -->
+    <update id="updateQuestionOption" parameterType="QuestionOption">
+        UPDATE question_options
+        SET question_id = #{questionId},
+            option_text = #{optionText},
+            option_label = #{optionLabel},
+            sequence_number = #{sequenceNumber},
+            is_correct = #{isCorrect}
+        WHERE id = #{id}
+    </update>
+
+    <!-- Delete question option -->
+    <delete id="deleteQuestionOption" parameterType="Integer">
+        DELETE FROM question_options WHERE id = #{id}
+    </delete>
+
+    <!-- Delete options by question -->
+    <delete id="deleteOptionsByQuestion" parameterType="Integer">
+        DELETE FROM question_options WHERE question_id = #{questionId}
+    </delete>
+
+    <!-- Count options by question -->
+    <select id="countOptionsByQuestion" parameterType="Integer" resultType="Integer">
+        SELECT COUNT(*) FROM question_options WHERE question_id = #{questionId}
+    </select>
+
+</mapper>
